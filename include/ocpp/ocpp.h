@@ -80,23 +80,44 @@ int ocpp_init(ocpp_event_callback_t cb, void *cb_ctx);
 int ocpp_step(void);
 
 /**
- * @bref Function to push a request to the OCPP server.
+ * @brief Pushes an OCPP request message.
  *
- * @param[in] type The type of the OCPP message.
- * @param[in] data Pointer to the data to be sent.
- * @param[in] datasize The size of the data to be sent.
- * @param[in] force If set to true, the request will be pushed even if the queue
- *            is full.
+ * This function creates and pushes an OCPP request message of the specified
+ * type.
  *
- * @note The oldest request will be dropped if the queue is full and `force` is
- *       set. If the oldest request is StartTransaction, StopTransaction or
- *       BootNotification, the next oldest request will be dropped.
+ * @param[in] type The type of the OCPP message to be pushed.
+ * @param[in] data A pointer to the data to be included in the message.
+ * @param[in] datasize The size of the data to be included in the message.
+ * @param[out] created A pointer to a pointer to an ocpp_message structure
+ *             where the created message will be stored.
  *
  * @return Returns 0 if the request was successfully pushed, non-zero
  *         otherwise.
  */
 int ocpp_push_request(ocpp_message_t type, const void *data, size_t datasize,
-		bool force);
+		struct ocpp_message **created);
+
+/**
+ * @brief Pushes an OCPP request message forcefully.
+ *
+ * This function creates and pushes an OCPP request message of the specified
+ * type, ensuring that the message is pushed even if the queue is full.
+ *
+ * @note The oldest request will be dropped if the queue is full set. If the
+ *       oldest request is StartTransaction, StopTransaction or
+ *       BootNotification, the next oldest request will be dropped.
+ *
+ * @param[in] type The type of the OCPP message to be pushed.
+ * @param[in] data A pointer to the data to be included in the message.
+ * @param[in] datasize The size of the data to be included in the message.
+ * @param[out] created A pointer to a pointer to an ocpp_message structure
+ *             where the created message will be stored.
+ *
+ * @return Returns 0 if the request was successfully pushed, non-zero
+ *         otherwise.
+ */
+int ocpp_push_request_force(ocpp_message_t type, const void *data,
+		size_t datasize, struct ocpp_message **created);
 
 /**
  * @brief Pushes a deferred OCPP request.
@@ -143,32 +164,24 @@ int ocpp_push_response(const struct ocpp_message *req,
 size_t ocpp_count_pending_requests(void);
 
 /**
- * @brief Save the current OCPP context as a snapshot.
+ * @brief Converts an OCPP message type to its string representation.
  *
- * @param[out] buf buffer for the snapshot to be saved
- * @param[in] bufsize size of the buffer
+ * @param[in] msgtype The OCPP message type to be converted.
  *
- * @note A header is included in the snapshot for validation upon restore,
- *       which is processed internally.
- *
- * @return 0 for success, otherwise an error.
+ * @return A constant character pointer to the string representation of the
+ * message type.
  */
-int ocpp_save_snapshot(void *buf, size_t bufsize);
-/**
- * @brief Restore the OCPP context from a snapshot.
- *
- * @param[in] snapshot snapshot to be loaded
- *
- * @note No need to call `ocpp_init()` when this function is used.
- *
- * @return 0 for success, otherwise an error.
- */
-int ocpp_restore_snapshot(const void *snapshot);
-size_t ocpp_compute_snapshot_size(void);
-
 const char *ocpp_stringify_type(ocpp_message_t msgtype);
 
+/**
+ * @brief Get message type from message type string
+ *
+ * @param[in] typestr The string representation of the OCPP message type.
+ *
+ * @return Type of message. `OCPP_MSG_MAX` if no matching found.
+ */
 ocpp_message_t ocpp_get_type_from_string(const char *typestr);
+
 /**
  * @brief Get message type from ID string
  *
