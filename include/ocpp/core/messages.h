@@ -79,12 +79,12 @@ struct ocpp_DataTransfer_conf {
 };
 
 struct ocpp_GetConfiguration {
-	char key[50+1];
+	char keys[0];
 };
 
 struct ocpp_GetConfiguration_conf {
-	struct ocpp_KeyValue configurationKey;
-	char unknownKey[OCPP_CiString50];
+	struct ocpp_KeyValue *configurationKey;
+	char *unknownKey;
 };
 
 struct ocpp_Heartbeat {

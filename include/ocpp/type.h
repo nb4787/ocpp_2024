@@ -314,6 +314,7 @@ typedef enum {
 	OCPP_BOOT_STATUS_ACCEPTED,
 	OCPP_BOOT_STATUS_PENDING,
 	OCPP_BOOT_STATUS_REJECTED,
+	OCPP_BOOT_STATUS_UNKNOWN,
 } ocpp_boot_status_t;
 
 typedef enum {
