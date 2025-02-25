@@ -47,11 +47,11 @@ TEST(Configuration, has_configuration_ShouldReturnFalse_WhenInvalidOneGiven) {
 }
 
 TEST(Configuration, count_ShouldReturnTheNumberOfConfigurations) {
-	LONGS_EQUAL(55, ocpp_count_configurations());
+	LONGS_EQUAL(54, ocpp_count_configurations());
 }
 
 TEST(Configuration, get_len_ShouldReturnWholeConfigurationSize) {
-	LONGS_EQUAL(271, ocpp_compute_configuration_size());
+	LONGS_EQUAL(546, ocpp_compute_configuration_size());
 }
 
 TEST(Configuration, set_ShouldSetTheConfiguration) {
@@ -145,7 +145,7 @@ TEST(Configuration, ShouldReturnIntString_WhenIntKeyGiven) {
 TEST(Configuration, ShouldReturnString_WhenStringKeyGiven) {
 	char buf[32];
 	const char *y = ocpp_stringify_configuration_value("CpoName", buf, sizeof(buf));
-	STRCMP_EQUAL("libmcu", y);
+	STRCMP_EQUAL("Pazzk", y);
 }
 TEST(Configuration, ShouldReturnCSLString_WhenCSLKeyGiven) {
 	char buf[32];

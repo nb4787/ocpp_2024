@@ -94,18 +94,22 @@ TEST_GROUP(Core) {
 		LONGS_EQUAL(type, event.type);
 	}
 	void go_bootnoti_accepted(void) {
+		struct ocpp_BootNotification_conf conf = {
+			.interval = 10,
+			.status = OCPP_BOOT_STATUS_ACCEPTED,
+		};
 		struct ocpp_message resp = {
 			.role = OCPP_MSG_ROLE_CALLRESULT,
 			.type = OCPP_MSG_BOOTNOTIFICATION,
-			.payload.fmt.response = &(const struct ocpp_BootNotification_conf) {
-				.interval = 10,
-				.status = OCPP_BOOT_STATUS_ACCEPTED,
-			},
 		};
-		ocpp_send_bootnotification(&(const struct ocpp_BootNotification) {
+		resp.payload.fmt.response = &conf;
+
+		const struct ocpp_BootNotification req = {
 			.chargePointModel = "Model",
 			.chargePointVendor = "Vendor",
-		});
+		};
+
+		ocpp_send_bootnotification(&req);
 
 		mock().expectOneCall("ocpp_send").andReturnValue(0);
 		mock().expectOneCall("ocpp_recv")
@@ -118,10 +122,12 @@ TEST_GROUP(Core) {
 };
 
 TEST(Core, step_ShouldNeverDropBootNotification_WhenSendFailed) {
-	ocpp_send_bootnotification(&(const struct ocpp_BootNotification) {
+	const struct ocpp_BootNotification boot = {
 		.chargePointModel = "Model",
 		.chargePointVendor = "Vendor",
-	});
+	};
+
+	ocpp_send_bootnotification(&boot);
 
 	int interval;
 	ocpp_get_configuration("HeartbeatInterval", &interval, sizeof(interval), 0);
@@ -134,9 +140,10 @@ TEST(Core, step_ShouldNeverDropBootNotification_WhenSendFailed) {
 }
 
 TEST(Core, step_ShouldDropMessage_WhenFailedSendingMoreThanRetries) {
-	ocpp_send_datatransfer(&(const struct ocpp_DataTransfer) {
+	const struct ocpp_DataTransfer data = {
 		.vendorId = "VendorID",
-	});
+	};
+	ocpp_send_datatransfer(&data);
 
 	mock().expectOneCall("ocpp_recv").ignoreOtherParameters().andReturnValue(-ENOMSG);
 	mock().expectOneCall("ocpp_send").andReturnValue(-1);
@@ -183,11 +190,12 @@ TEST(Core, step_ShouldSendHeartBeat_WhenNoMessageSentDuringHeartBeatInterval) {
 }
 
 TEST(Core, step_ShouldNotSendHeartBeat_WhenAnyMessageSentDuringHeartBeatInterval) {
+	const struct ocpp_DataTransfer data = {
+		.vendorId = "VendorID",
+	};
 	int interval;
 	ocpp_get_configuration("HeartbeatInterval", &interval, sizeof(interval), NULL);
-	ocpp_send_datatransfer(&(const struct ocpp_DataTransfer) {
-		.vendorId = "VendorID",
-	});
+	ocpp_send_datatransfer(&data);
 	mock().expectOneCall("ocpp_send").andReturnValue(0);
 	mock().expectOneCall("ocpp_recv").ignoreOtherParameters().andReturnValue(-ENOMSG);
 	step(interval);
@@ -293,9 +301,10 @@ TEST(Core, ShouldSendTransactionRelatedmessagesIndefinitely_WhenTransportErrors)
 }
 
 TEST(Core, ShouldDropNonTransactionRelatedMessagesAfterTimeout_WhenNoResponseReceived) {
-	ocpp_push_request(OCPP_MSG_DATA_TRANSFER, &(const struct ocpp_DataTransfer) {
+	const struct ocpp_DataTransfer data = {
 		.vendorId = "VendorID",
-	}, sizeof(struct ocpp_DataTransfer), NULL);
+	};
+	ocpp_push_request(OCPP_MSG_DATA_TRANSFER, &data, sizeof(data), NULL);
 
 	int i = 0;
 	for (; i < OCPP_DEFAULT_TX_RETRIES; i++) {
@@ -310,9 +319,10 @@ TEST(Core, ShouldDropNonTransactionRelatedMessagesAfterTimeout_WhenNoResponseRec
 }
 
 TEST(Core, ShouldDropNonTransactionRelatedMessagesAfterTimeout_WhenTransportErrors) {
-	ocpp_push_request(OCPP_MSG_DATA_TRANSFER, &(const struct ocpp_DataTransfer) {
+	const struct ocpp_DataTransfer data = {
 		.vendorId = "VendorID",
-	}, sizeof(struct ocpp_DataTransfer), NULL);
+	};
+	ocpp_push_request(OCPP_MSG_DATA_TRANSFER, &data, sizeof(data), NULL);
 
 	int i = 0;
 	for (; i < OCPP_DEFAULT_TX_RETRIES-1; i++) {
@@ -328,10 +338,11 @@ TEST(Core, ShouldDropNonTransactionRelatedMessagesAfterTimeout_WhenTransportErro
 }
 
 TEST(Core, ShouldSendBootNotification_WhenRequested) {
-	ocpp_send_bootnotification(&(const struct ocpp_BootNotification) {
+	const struct ocpp_BootNotification boot = {
 		.chargePointModel = "Model",
 		.chargePointVendor = "Vendor",
-	});
+	};
+	ocpp_send_bootnotification(&boot);
 
 	mock().expectOneCall("ocpp_send").andReturnValue(0);
 	mock().expectOneCall("ocpp_recv").ignoreOtherParameters().andReturnValue(-ENOMSG);

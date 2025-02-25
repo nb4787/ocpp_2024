@@ -10,10 +10,6 @@
 #include <errno.h>
 #include <stdio.h>
 
-#if !defined(OCPP_LIBRARY_VERSION)
-#define OCPP_LIBRARY_VERSION		0
-#endif
-
 #if !defined(OCPP_CONFIGURATION_DEFINES)
 #define OCPP_CONFIGURATION_DEFINES	"ocpp_configuration.def.template"
 #endif
